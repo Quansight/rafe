@@ -1,0 +1,19 @@
+package:
+  name: bitarray
+  version: 2.6.0
+
+source:
+  url: https://files.pythonhosted.org/packages/80/b8/e81dda81f027e559728f6ee9bea7ec5e1fbf77120afbee4c440d3902d0a8/bitarray-2.6.0.tar.gz
+  md5: fcc8c3ef59eb9e6e99bedd4a7e7ff7f7
+
+test:
+  imports:
+    - bitarray
+    - bitarray._bitarray
+    - bitarray._util
+
+about:
+  home: https://github.com/ilanschnell/bitarray
+  license: PSF
+  description: |
+    provides an object type which efficiently represents an array of booleans
