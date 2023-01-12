@@ -3,8 +3,6 @@ from setuptools import setup
 
 import rafe
 
-assert sys.argv[1] in ('develop', 'sdist')
-
 
 setup(
     name = "rafe",
