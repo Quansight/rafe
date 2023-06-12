@@ -1,14 +1,36 @@
 # rafe: Reproducible Artifacts for Environments
 
-A tool for building any type of package (e.g. wheel) in a reproducible
-fashion.  The tool is a thin wrapper around a script which gets executed
-in the source directory of a package.  The script, as well as metadata (such
-has source URL, name, version, patches, etc.) are part of a recipe.
+rafe is a tool for inspecting python environments and building packages (irrespective of language) in a reproducible manner. 
 
-Trying it out::
+## Building
 
-    $ python setup.py develop
+To press a fresh rafe wheel from source, simply run:
 
-Building a package (must have a recipe in `recipes/`::
+```bash
+python setup.py bdist_wheel
+```
 
-    $ build bitarray
+And the wheel should be available in the `dist/` folder.
+
+## Installing
+
+To install rafe, simply pip install the wheel 
+
+```bash
+pip install <wheel>
+```
+
+## Usage
+
+Before starting to use rafe, it needs to generate a configuration. Do this by running:
+
+```bash
+rafe config --init
+```
+
+Now, you can use rafe however you'd like. Note that you can call it in two ways:
+
+* `python -m rafe`
+* `rafe`
+
+Both are valid. 
