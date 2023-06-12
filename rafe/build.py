@@ -1,9 +1,9 @@
 import os
 import sys
-from subprocess import check_call
+import subprocess 
 from os.path import isfile, join
 
-from rafe.config import recipes_dir
+from rafe.logger import logger 
 import rafe.source as source
 
 
@@ -13,56 +13,63 @@ def get_environ():
     d['PYTHON'] = sys.executable
     return d
 
+def ensure_build_dir_exists(recipe_dir, package):
+	"""
+	If the build directory exists, return true. Otherwise, raise an error.
+	"""
+	pass
 
-def build(recipe_dir):
-    source.provide(recipe_dir)
-    src_dir = source.get_dir()
-    print("source tree in:", src_dir)
-    env = get_environ()
 
-    if sys.platform == 'win32':
-        vcvarsall = (r'C:\Program Files (x86)\Microsoft Visual Studio 14.0'
+def build_package(recipe_dir):
+	"""
+	Builds a package for the platform that is being used to build. 
+	"""
+	
+	source.provide(recipe_dir)
+	src_dir = source.get_dir()
+
+	logger.info(f"""
+	Building Pacakge: {recipe_dir}
+	Source Tree: 	  {src_dir}
+	""")
+
+	env = get_environ()
+
+	if sys.platform == 'win32':
+		vcvarsall = (r'C:\Program Files (x86)\Microsoft Visual Studio 14.0'
                      r'\VC\vcvarsall.bat')
-        assert isfile(vcvarsall)
+		assert isfile(vcvarsall)
 
-        with open(join(recipe_dir, 'bld.bat')) as fi:
-            data = fi.read()
-        with open(join(src_dir, 'bld.bat'), 'w') as fo:
+		with open(join(recipe_dir, 'bld.bat')) as fi:
+			data = fi.read()
+			logger.debug(f"Read File {join(recipe_dir, 'bld.bat')} [green] SUCCESS [/green]")
+
+		with open(join(src_dir, 'bld.bat'), 'w') as fo:
             # more debuggable with echo on
-            fo.write('@echo on\n')
-            for kv in env.items():
-                fo.write('set %s=%s\n' % kv)
-            fo.write('call "%s" amd64\n' % vcvarsall)
-            fo.write(":: --- end generated header ---\n")
-            fo.write(data)
+			fo.write('@echo on\n')
+			for kv in env.items():
+				fo.write('set %s=%s\n' % kv)
+				fo.write('call "%s" amd64\n' % vcvarsall)
+				fo.write(":: --- end generated header ---\n")
+				fo.write(data)
+		
+		cmd = [os.environ['COMSPEC'], '/c', 'bld.bat']
+		subprocess.check_call(cmd, cwd=src_dir)
 
-        cmd = [os.environ['COMSPEC'], '/c', 'bld.bat']
-        check_call(cmd, cwd=src_dir)
-    else:
-        cmd = ['/bin/bash', '-x', '-e', join(recipe_dir, 'build.sh')]
-        check_call(cmd, env=env, cwd=src_dir)
+	else:
 
+		cmd = ['/bin/bash', '-x', '-e', recipe_dir.joinpath('build.sh')]
+		
+		build_process = subprocess.Popen(cmd, env=env, cwd=src_dir, stdout=subprocess.PIPE, bufsize=1)
+		log_relative_filename = f"[bold cyan] {recipe_dir.name}" + "/build.sh" + "[/bold cyan] | " 
+		for line in build_process.stdout:
+			logger.info(log_relative_filename + line.decode('UTF-8').strip('\n'), extra={"markup": True})
 
-def main():
-    from optparse import OptionParser
+		build_process.wait()
+		if build_process.returncode != 0:
+			raise OSError(build_process.returncode) 	
 
-    p = OptionParser(usage="usage: %prog [options] PACKAGE [PACKAGE ...]",
-                     description="build a package")
+		logger.info(f'Build of {recipe_dir.name} [bold green] SUCCESS [/bold green] :boom:', extra={"markup": True})
+		return 0
 
-    p.add_option("--version",
-                 action = "store_true",
-                 help = "pint version and exit")
-
-    opts, args = p.parse_args()
-
-    if opts.version:
-        from rafe import __version__
-        print("rafe: %s" % __version__)
-        return
-
-    for arg in args:
-        build(join(recipes_dir, arg))
-
-
-if __name__ == '__main__':
-    main()
+		

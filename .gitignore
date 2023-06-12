@@ -1,4 +1,7 @@
 *~
 *.egg-info
 dist/
+
 rafe/__pycache__/
+rafe/rafe_env/
+rafe_env/
