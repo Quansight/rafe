@@ -1,0 +1,26 @@
+{
+	"python_version_requested": "py37",
+	"package_arch": "linux-64",
+	"packages":[
+		{
+			"name": "numpy",
+			"version": "1.21.2"
+		},
+		{
+			"name": "pandas",
+			"version": "1.3.3"
+		},
+		{
+			"name": "requests",
+			"version": "2.23.0"
+		},
+		{
+			"name": "scipy",
+			"version": "1.7.3"
+		},
+		{
+			"name": "pytorch",
+			"version": "1.12.1"
+		}
+	]
+}
