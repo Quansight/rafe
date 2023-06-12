@@ -7,14 +7,20 @@ import rafe
 setup(
     name = "rafe",
     version = rafe.__version__,
-    author = "Ilan Schnell",
+    author = "Anirrudh Krishnan, Dillon Roach, Ilan Schnell",
     url = "https://github.com/Quansight/rafe",
     license = "BSD",
-    description = "Reproducible Artifacts for Environments",
+    description = "A build and environment analysis tool for Python",
     long_description = open('README.md').read(),
-    packages = ['rafe', 'examples'],
+    packages = ['rafe'],
     entry_points = {'console_scripts': [
-        'build = rafe.build:main',
+        'rafe = rafe.main:cli',
     ]},
-    package_data = {'examples': ['*/*']},
+    install_requires = [
+        'typer >= 0.7.0',
+        'rich',
+        'aiohttp',
+        'aiofiles',
+    ]
+    #package_data = {'examples': ['*/*']},
 )
