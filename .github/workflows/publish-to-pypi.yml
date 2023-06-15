@@ -16,21 +16,22 @@ on:
 jobs:
   call-build:
     uses: Quansight/rafe/.github/workflows/build-package.yml@master
-    
+  
   deploy:
 
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write
+      # IMPORTANT: this permission is mandatory for trusted publishing
+      id-token: write
+      
     steps:
     
-    - name: Download generated wheel
+    - name: Download generated dist
       uses: actions/download-artifact@v3
       with:
         name: rafe-wheel
-        path: ./*.whl
+        path: dist/
         
     - name: Publish package
-      uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
-      with:
-        repository-url: https://test.pypi.org/legacy/
- 
+      uses: pypa/gh-action-pypi-publish@release/v1

@@ -21,6 +21,9 @@ setup(
         'rich',
         'aiohttp',
         'aiofiles',
+        'pyyaml',
+        'requests',
+        'pydantic'
     ]
     #package_data = {'examples': ['*/*']},
 )
