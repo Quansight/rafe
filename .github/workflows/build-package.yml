@@ -9,7 +9,6 @@
 name: Build rafe package 
 
 on:  
-  push:
   pull_request:
     branches:
       - master
