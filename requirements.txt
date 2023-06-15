@@ -1,4 +1,7 @@
 typer==0.7.0
 rich==13.3.3
 aiohttp==3.8.4
-aiofiles==23.0.1
+aiofiles==23.1.0
+pyyaml
+requests
+pydantic
