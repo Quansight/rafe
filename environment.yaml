@@ -1,0 +1,13 @@
+name: rafe
+channels:
+  - conda-forge
+dependencies:
+  - python==3.7
+  - typer
+  - rich
+  - aiohttp
+  - aiofiles
+  - pyyaml
+  - requests
+  - pydantic
+  - pytest
