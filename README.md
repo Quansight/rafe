@@ -4,6 +4,7 @@ rafe is a tool for inspecting python environments and building packages (irrespe
 
 -----------------------------------------------------------
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Quansight/rafe/build-package.yml?label=Build&logo=github&style=for-the-badge)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Quansight/rafe/test-rafe.yml?label=Tests&logo=github&style=for-the-badge)
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Quansight/rafe/publish-to-pypi.yml?label=Publish&logo=github&style=for-the-badge)<br>
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/Quansight/rafe?logo=github&style=for-the-badge)
 ![PyPI](https://img.shields.io/pypi/v/rafe?logo=pypi&style=for-the-badge)
