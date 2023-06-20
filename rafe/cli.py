@@ -1,18 +1,14 @@
 import typing
 import pathlib
-import sys
 import json
 import typer
 
-import requests
-from urllib.request import urlopen
 from datetime import datetime
 
 from rich import print
 from rich.console import Console
 from rich.table import Table
 from rich.progress import Progress
-from rich.json import JSON
 from rich.prompt import Prompt
 
 from rafe import __version__
@@ -21,9 +17,9 @@ from rafe.build import build_package
 from rafe.config import create_app_dirs
 from rafe.logger import logger, setFileHandle
 
-from rafe.plugin import RafePlugin, RafePluginManager
+from rafe.plugin import RafePluginManager
 
-from rafe.cli_api import load_repodata, update_all_repodata, fetch_repodata_file, fetch_all_package_jsons
+from rafe.cli_api import load_repodata, update_all_repodata, fetch_all_package_jsons
 
 app = typer.Typer(rich_markup_mode="rich", add_completion=False)
 
