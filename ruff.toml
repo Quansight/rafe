@@ -1,8 +1,2 @@
-[project]
-# Support Python 3.10+.
-requires-python = ">=3.8"
-
-[tool.ruff]
-# Decrease the maximum line length to 79 characters.
-line-length = 79
+line-length = 88 
 src = ["rafe"]
