@@ -23,17 +23,20 @@ from rafe.cli_api import load_repodata, update_all_repodata, fetch_all_package_j
 
 app = typer.Typer(rich_markup_mode="rich", add_completion=False)
 
-if pathlib.Path.home().joinpath('.rafe', 'plugins_conf.json').exists():
-    rpm = RafePluginManager(app, pathlib.Path.home().joinpath('.rafe', 'plugins_conf.json') ,logger)
- 
+if pathlib.Path.home().joinpath(".rafe", "plugins_conf.json").exists():
+    rpm = RafePluginManager(
+        app, pathlib.Path.home().joinpath(".rafe", "plugins_conf.json"), logger
+    )
+
 
 def callback_get_version(value: bool):
     """
     prints the current verson of rafe used
     """
     if value:
-        print(f':rocket: Rafe Version: [bold green]{__version__}[/bold green]')
+        print(f":rocket: Rafe Version: [bold green]{__version__}[/bold green]")
         raise typer.Exit()
+
 
 def callback_config_init(init: bool):
     """
@@ -43,106 +46,153 @@ def callback_config_init(init: bool):
         create_app_dirs()
         raise typer.Exit()
 
+
 search_options = {
     "python_version": typer.Option("py37", "--pyV", help="specify a python version"),
-    "package_name": typer.Option(..., "--package", help="search for existance of conda-forge package name"),
-    "package_arch": typer.Option("linux-64", "--arch", help="specify an architecture type"),
+    "package_name": typer.Option(
+        ..., "--package", help="search for existance of conda-forge package name"
+    ),
+    "package_arch": typer.Option(
+        "linux-64", "--arch", help="specify an architecture type"
+    ),
     "package_version": typer.Option(None, "--version", help="specify package version"),
     "fetch": typer.Option(None, "--fetch", help="specify package version"),
 }
 
+
 @app.command(rich_help_panel="Inspect")
-def search(python_version: str = search_options["python_version"], package_name: str = search_options["package_name"], package_version: str = search_options["package_version"], package_arch: str = search_options["package_arch"],fetch: typing.Optional[bool] = search_options["fetch"]):
+def search(
+    python_version: str = search_options["python_version"],
+    package_name: str = search_options["package_name"],
+    package_version: str = search_options["package_version"],
+    package_arch: str = search_options["package_arch"],
+    fetch: typing.Optional[bool] = search_options["fetch"],
+):
     """
     Given the arguments, this searches for packages across conda-forge, matches them with any given input, and returns them.
     """
-    def match_packages(cfgraph: CFGraph, repodata_object: str, progress: Progress) -> typing.List:
+
+    def match_packages(
+        cfgraph: CFGraph, repodata_object: str, progress: Progress
+    ) -> typing.List:
         """
         Matches Packages, and returns the set of matched possibilities.
         """
-        matched_packages = cfgraph.match_packages(package_name, package_version, python_version, package_arch, repodata_object)
+        matched_packages = cfgraph.match_packages(
+            package_name, package_version, python_version, package_arch, repodata_object
+        )
         progress.update(task_id, advance=1)
         return matched_packages
-    
 
     cfgraph = CFGraph(logger=logger)
 
     total_steps = 8
-    # Add conditional step to fetch 
+    # Add conditional step to fetch
     if fetch is True:
         total_steps += 1
 
     with Progress() as progress:
-        task_id = progress.add_task("[cyan] Total Search progress: [/cyan]", total=total_steps)
+        task_id = progress.add_task(
+            "[cyan] Total Search progress: [/cyan]", total=total_steps
+        )
 
         # Update Repodata; Total progress advances 6
         update_all_repodata(cfgraph, task_id, progress)
 
         # Load Repodata; Total progress advance 1
         json_object = load_repodata(cfgraph, task_id, progress, package_arch)
-        
+
         # Search conda-forge for all possible package matches; Total progress advance 1
-        matched_packages = match_packages(cfgraph, json_object, progress)   
+        matched_packages = match_packages(cfgraph, json_object, progress)
 
         # TODO: Implement package filtering here
         logger.info(matched_packages)
 
         if fetch is True:
             cfgraph.fetch_package_json(package_name, matched_packages[0], package_arch)
-            progress.update(task_id,advance = 1)
+            progress.update(task_id, advance=1)
 
     return
 
+
 depends_options = {
     "package": typer.Option(..., "--package", help="target package to check"),
-	"debug": typer.Option(None, "--debug", help="print matched build tags"),
+    "debug": typer.Option(None, "--debug", help="print matched build tags"),
     "run": typer.Option(None, "--run", help="run check for runtime depends"),
-    "build": typer.Option(None, "--build", help="run check for buildtime depends")
+    "build": typer.Option(None, "--build", help="run check for buildtime depends"),
 }
 
+
 @app.command(rich_help_panel="Inspect")
-def depends(package: str = depends_options["package"], debug: typing.Optional[bool] = depends_options["debug"], run_flag: typing.Optional[bool] = depends_options["run"], build_flag: typing.Optional[bool] = depends_options["build"]):
+def depends(
+    package: str = depends_options["package"],
+    debug: typing.Optional[bool] = depends_options["debug"],
+    run_flag: typing.Optional[bool] = depends_options["run"],
+    build_flag: typing.Optional[bool] = depends_options["build"],
+):
     """
     Verify runtime dependencies for a supplied package
     """
     if not (run_flag or build_flag):
-        logger.info("Please supply either --run or --build to specify which dependencies to check")
+        logger.info(
+            "Please supply either --run or --build to specify which dependencies to check"
+        )
         return
     cfgraph = CFGraph(logger=logger)
     lin64_json_object = cfgraph.load_repodata(arch="linux-64")
     noarch_json_object = cfgraph.load_repodata(arch="noarch")
     if run_flag:
-        cfgraph.check_package_build(package, lin64_json_object, noarch_json_object, 'run', debug)
+        cfgraph.check_package_build(
+            package, lin64_json_object, noarch_json_object, "run", debug
+        )
     elif build_flag:
-        cfgraph.check_package_build(package, lin64_json_object, noarch_json_object, 'build', debug)
+        cfgraph.check_package_build(
+            package, lin64_json_object, noarch_json_object, "build", debug
+        )
     else:
-        logger.info("Please supply either --run or --build to specify which dependencies to check")
+        logger.info(
+            "Please supply either --run or --build to specify which dependencies to check"
+        )
     return
+
 
 manifest_fetch_options = {
     "manifest": typer.Option(..., "--manifest", help="path to manifest json file"),
     "arch": typer.Option("linux-64", "--arch", help="specific architecture to target"),
-    "drop_versions": typer.Option(None, "--drop-versions", help="drop package version requirements in match"),
-    "from_cache": typer.Option(None, "--from-cache", help="load the last used matches from missed and matched"),
+    "drop_versions": typer.Option(
+        None, "--drop-versions", help="drop package version requirements in match"
+    ),
+    "from_cache": typer.Option(
+        None, "--from-cache", help="load the last used matches from missed and matched"
+    ),
 }
 
+
 @app.command(rich_help_panel="Inspect")
-def manifest_fetch(manifest: pathlib.Path = manifest_fetch_options["manifest"],
-                   arch: str = manifest_fetch_options["arch"],
-                   from_cache: typing.Optional[bool] = manifest_fetch_options["from_cache"],
-                   drop_versions: typing.Optional[bool] = manifest_fetch_options["drop_versions"] ):
+def manifest_fetch(
+    manifest: pathlib.Path = manifest_fetch_options["manifest"],
+    arch: str = manifest_fetch_options["arch"],
+    from_cache: typing.Optional[bool] = manifest_fetch_options["from_cache"],
+    drop_versions: typing.Optional[bool] = manifest_fetch_options["drop_versions"],
+):
     """
     Takes formatted JSON manifest and caches matched libcfgraph artifacts
     """
     cfgraph = CFGraph(logger=logger)
-    total_steps = 9 
+    total_steps = 9
 
     with Progress() as progress:
-        task_id = progress.add_task("[cyan] Total Package Match Progress: [/cyan]", total=total_steps)
+        task_id = progress.add_task(
+            "[cyan] Total Package Match Progress: [/cyan]", total=total_steps
+        )
 
         if manifest.exists():
-            package_arch, python_version_requested, manifest_packages = cfgraph.read_manifest(manifest)
-            progress.update(task_id, advance = 1)
+            (
+                package_arch,
+                python_version_requested,
+                manifest_packages,
+            ) = cfgraph.read_manifest(manifest)
+            progress.update(task_id, advance=1)
 
             update_all_repodata(cfgraph, task_id, progress)
 
@@ -156,25 +206,41 @@ def manifest_fetch(manifest: pathlib.Path = manifest_fetch_options["manifest"],
             if from_cache is True:
                 to_fetch = cfgraph.read_missed_and_matched_from_cache()
             else:
-                to_fetch = cfgraph.missed_and_matched_from_manifest(package_arch, python_version_requested, manifest_packages, drop_versions, json_object)
-            
-            progress.update(task_id, advance = 1)
+                to_fetch = cfgraph.missed_and_matched_from_manifest(
+                    package_arch,
+                    python_version_requested,
+                    manifest_packages,
+                    drop_versions,
+                    json_object,
+                )
 
-            logger.info(f'Fetching package jsons for matched {len(to_fetch)}')
+            progress.update(task_id, advance=1)
+
+            logger.info(f"Fetching package jsons for matched {len(to_fetch)}")
 
             fetch_all_package_jsons(to_fetch, progress)
 
-
         else:
-            logger.error('The provided manifest file does not exist or could not be found.') 
+            logger.error(
+                "The provided manifest file does not exist or could not be found."
+            )
             raise typer.Exit()
 
 
 depends_on_options = {
-    "package_name": typer.Option(..., "--package", help="check all cached json files for inclusion of given package in build dependency"),
-    "arch" : typer.Option("linux-64", "--arch", help="specified architecture to generate dependencies for"), 
-    "output": typer.Option(..., "-o", help="Path of where to place the resulting query's output file")
+    "package_name": typer.Option(
+        ...,
+        "--package",
+        help="check all cached json files for inclusion of given package in build dependency",
+    ),
+    "arch": typer.Option(
+        "linux-64", "--arch", help="specified architecture to generate dependencies for"
+    ),
+    "output": typer.Option(
+        ..., "-o", help="Path of where to place the resulting query's output file"
+    ),
 }
+
 
 @app.command(rich_help_panel="Inspect")
 def depends_on(package_name: str = depends_on_options["package_name"]):
@@ -186,61 +252,88 @@ def depends_on(package_name: str = depends_on_options["package_name"]):
     print(matches)
     return
 
+
 convert_missed_options = {
     "path": typer.Option(..., "--path", help="path to json produced by rafe"),
-	"arch": typer.Option("linux-64", "--arch", help="specified architecture to set in new manifest"),
-	"pyVer": typer.Option(None, "--pyVer", help="specified python version to set in new manifest"),
-	"output": typer.Option(".", "--output", help="directory location to write output file")
+    "arch": typer.Option(
+        "linux-64", "--arch", help="specified architecture to set in new manifest"
+    ),
+    "pyVer": typer.Option(
+        None, "--pyVer", help="specified python version to set in new manifest"
+    ),
+    "output": typer.Option(
+        ".", "--output", help="directory location to write output file"
+    ),
 }
 
+
 @app.command(rich_help_panel="Inspect")
-def convert_missed(json_path: pathlib.Path = convert_missed_options["path"], arch: str = convert_missed_options["arch"], pyVer: str = convert_missed_options["pyVer"]):
+def convert_missed(
+    json_path: pathlib.Path = convert_missed_options["path"],
+    arch: str = convert_missed_options["arch"],
+    pyVer: str = convert_missed_options["pyVer"],
+):
     """
     Creates a new manifest based on the missed_packages from a previous manifest match json
     """
     if arch == "noarch":
         pyVer = ""
-	
+
     if (pyVer != None) and (pyVer != ""):
         pyVer = "".join(pyVer.split("."))
         if pyVer[:2] != "py":
-            pyver = "py"+pyVer
-    if len(pyVer)>4:
+            pyver = "py" + pyVer
+    if len(pyVer) > 4:
         logger.error("PyVer format should be 'py37' or '3.7' or '37'")
         raise typer.Exit()
 
     if json_path.exists():
-        with open(json_path, 'r') as f:
+        with open(json_path, "r") as f:
             manifest_json = json.load(f)
     else:
         raise FileNotFound()
 
-    converted = {"python_version_requested": pyVer, "package_arch": arch, "packages": []}
+    converted = {
+        "python_version_requested": pyVer,
+        "package_arch": arch,
+        "packages": [],
+    }
     converted["packages"] = manifest_json["missed_packages"]
     if json_path.parent.is_dir():
-        file_name = f"converted_missed_{arch}_{pyVer}_{datetime.now().strftime('%H%M%S')}.json"
+        file_name = (
+            f"converted_missed_{arch}_{pyVer}_{datetime.now().strftime('%H%M%S')}.json"
+        )
         output = json_path.parent.joinpath(file_name)
         try:
-            with open(output, 'w') as write_file:
+            with open(output, "w") as write_file:
                 json.dump(converted, write_file)
             logger.info(f"Converted json written to: {str(output)}")
         except:
             logger.error("Error writing to file")
             raise typer.Exit()
     else:
-        logger.error("Parent path of input file not a directory, aborting without specified output dir.")
+        logger.error(
+            "Parent path of input file not a directory, aborting without specified output dir."
+        )
         raise typer.Exit()
     return
 
+
 build_options = {
-    "recipe_dir": typer.Option(..., "--recipe-dir", help="path to build recipies for packages"),
-    "package": typer.Option(..., "--package", help="name of package to build")
+    "recipe_dir": typer.Option(
+        ..., "--recipe-dir", help="path to build recipies for packages"
+    ),
+    "package": typer.Option(..., "--package", help="name of package to build"),
 }
 
+
 @app.command(rich_help_panel="Build")
-def build(recipe_dir: pathlib.Path = build_options["recipe_dir"], package: pathlib.Path = build_options["package"]):
+def build(
+    recipe_dir: pathlib.Path = build_options["recipe_dir"],
+    package: pathlib.Path = build_options["package"],
+):
     """
-    Builds a python wheel given a directory and recipe 
+    Builds a python wheel given a directory and recipe
     """
     package_path = pathlib.Path.joinpath(recipe_dir, package)
 
@@ -251,14 +344,17 @@ def build(recipe_dir: pathlib.Path = build_options["recipe_dir"], package: pathl
     else:
         raise FileNotFound()
 
+
 def callback_plugin_add(path):
     if isinstance(path, pathlib.Path) and path.exists():
         absolute_path = path.resolve()
         name = path.name
-        entrypoint = Prompt.ask("Please Define an entrypoint; This is the function that will be used like rafe <function>")
+        entrypoint = Prompt.ask(
+            "Please Define an entrypoint; This is the function that will be used like rafe <function>"
+        )
         rpm.add_plugin(name, absolute_path, entrypoint)
     else:
-        #TODO Investigate why this gets called back.
+        # TODO Investigate why this gets called back.
         ...
 
 
@@ -277,27 +373,50 @@ def callback_plugin_list():
     console.print(table)
     return
 
+
 plugin_configuration_options = {
-    "add": typer.Option(None, "--add", help="Add a plugin given a folder", callback=callback_plugin_add),
-    "list": typer.Option(None, "--list", help="Print the current plugin configuration", callback=callback_plugin_list),
+    "add": typer.Option(
+        None, "--add", help="Add a plugin given a folder", callback=callback_plugin_add
+    ),
+    "list": typer.Option(
+        None,
+        "--list",
+        help="Print the current plugin configuration",
+        callback=callback_plugin_list,
+    ),
     "generate-cli-template": "",
-    "clean-cache": typer.Option(None, "--clean-cache", help="Cleans the plugin cache", callback=None),
-    "show-cache": typer.Option(None, "--show-cache", help="Look at the currently cached objects", callback=None),
+    "clean-cache": typer.Option(
+        None, "--clean-cache", help="Cleans the plugin cache", callback=None
+    ),
+    "show-cache": typer.Option(
+        None, "--show-cache", help="Look at the currently cached objects", callback=None
+    ),
 }
 
+
 @app.command(rich_help_panel="Utilities")
-def plugin(add: typing.Optional[pathlib.Path] = plugin_configuration_options["add"],
-           lst: typing.Optional[bool] = plugin_configuration_options["list"],
-           clean_cache: typing.Optional[bool] = plugin_configuration_options["clean-cache"],
-           show_cache: typing.Optional[bool] = plugin_configuration_options["show-cache"]):
+def plugin(
+    add: typing.Optional[pathlib.Path] = plugin_configuration_options["add"],
+    lst: typing.Optional[bool] = plugin_configuration_options["list"],
+    clean_cache: typing.Optional[bool] = plugin_configuration_options["clean-cache"],
+    show_cache: typing.Optional[bool] = plugin_configuration_options["show-cache"],
+):
     """
     Manages rafe plugins and configuration.
     """
     return
 
+
 configuration_options = {
-    "init": typer.Option(None, "--init", help="initializes a configuration with sane defaults", callback=callback_config_init, is_eager=True),
+    "init": typer.Option(
+        None,
+        "--init",
+        help="initializes a configuration with sane defaults",
+        callback=callback_config_init,
+        is_eager=True,
+    ),
 }
+
 
 @app.command(rich_help_panel="Utilities")
 def config(init: typing.Optional[bool] = configuration_options["init"]):
@@ -306,22 +425,29 @@ def config(init: typing.Optional[bool] = configuration_options["init"]):
     """
     return
 
+
 main_options = {
-    "version": typer.Option(None, "--version", help="prints the current version", callback=callback_get_version, is_eager=True),
-    }
+    "version": typer.Option(
+        None,
+        "--version",
+        help="prints the current version",
+        callback=callback_get_version,
+        is_eager=True,
+    ),
+}
+
 
 @app.callback()
-def main(
-    version: typing.Optional[bool] = main_options["version"] 
-    ):
+def main(version: typing.Optional[bool] = main_options["version"]):
     """
-    Rafe is a build tool for python 
+    Rafe is a build tool for python
     """
     return
 
+
 def run():
-    if pathlib.Path.home().joinpath('.rafe').exists():
-        setFileHandle(logger, pathlib.Path.home().joinpath('.rafe', '.cfcache', 'package_reports'))
+    if pathlib.Path.home().joinpath(".rafe").exists():
+        setFileHandle(
+            logger, pathlib.Path.home().joinpath(".rafe", ".cfcache", "package_reports")
+        )
     app(prog_name="rafe")
-
-
