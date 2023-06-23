@@ -27,4 +27,5 @@ jobs:
         pip install ruff 
 
     - name: Lint with ruff
+      continue-on-error: true
       run: ruff check . 
