@@ -1,7 +1,6 @@
 import os
 import sys
 import subprocess
-from os.path import isfile, join
 
 from rafe.logger import logger
 import rafe.source as source
@@ -26,6 +25,7 @@ def build_package(recipe_dir):
     Builds a package for the platform that is being used to build.
     """
 
+    recipe_dir = recipe_dir.resolve()
     source.provide(recipe_dir)
     src_dir = source.get_dir()
 
@@ -42,15 +42,14 @@ def build_package(recipe_dir):
         vcvarsall = (
             r"C:\Program Files (x86)\Microsoft Visual Studio 14.0" r"\VC\vcvarsall.bat"
         )
-        assert isfile(vcvarsall)
+        assert os.path.isfile(vcvarsall)
 
-        with open(join(recipe_dir, "bld.bat")) as fi:
+        batfile = recipe_dir.joinpath("bld.bat")
+        with open(batfile) as fi:
             data = fi.read()
-            logger.debug(
-                f"Read File {join(recipe_dir, 'bld.bat')} [green] SUCCESS [/green]"
-            )
-
-        with open(join(src_dir, "bld.bat"), "w") as fo:
+            logger.debug(f"Read File {batfile} [green] SUCCESS [/green]")
+        srcdir = src_dir.joinpath("bld.bat")
+        with open(srcdir, "w") as fo:
             # more debuggable with echo on
             fo.write("@echo on\n")
             for kv in env.items():
