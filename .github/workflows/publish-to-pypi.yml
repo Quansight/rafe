@@ -15,7 +15,7 @@ on:
 
 jobs:
   call-build:
-    uses: Quansight/rafe/.github/workflows/build-package.yml@master
+    uses: Quansight/rafe/.github/workflows/build-package.yml@main
   
   deploy:
 
