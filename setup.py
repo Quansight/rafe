@@ -21,11 +21,11 @@ setup(
     install_requires=[
         "typer >= 0.7.0",
         "rich",
+        "GitPython",
         "aiohttp",
         "aiofiles",
         "pyyaml",
         "requests",
         "pydantic",
     ]
-    # package_data = {'examples': ['*/*']},
 )

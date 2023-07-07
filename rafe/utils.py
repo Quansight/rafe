@@ -151,7 +151,3 @@ def safe_write(path, mode="w"):
         yield fo
 
     os.rename(tmp_path, path)
-
-
-if __name__ == "__main__":
-    pass

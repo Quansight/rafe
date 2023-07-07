@@ -1,0 +1,20 @@
+package:
+  name: bitarray
+  version: 2.7.7
+
+source:
+  url: https://github.com/ilanschnell/bitarray
+  branch: master
+  sha: 61d36007569acb6719e95743d57d9507d816fd5b
+
+test:
+  imports:
+    - bitarray
+    - bitarray._bitarray
+    - bitarray._util
+
+about:
+  home: https://github.com/ilanschnell/bitarray
+  license: PSF
+  description: |
+    provides an object type which efficiently represents an array of booleans

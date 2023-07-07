@@ -2,7 +2,8 @@ name: rafe
 channels:
   - conda-forge
 dependencies:
-  - python==3.7
+  - python
+  - GitPython
   - typer
   - rich
   - aiohttp
