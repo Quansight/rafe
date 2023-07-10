@@ -78,9 +78,3 @@ def render_recipe(recipe_dir, cfg=None):
     data = open(path).read()
     meta = parse(data, cfg)
     return meta
-
-
-if __name__ == "__main__":
-    from pprint import pprint
-
-    pprint(render_recipe("../examples/bitarray"))

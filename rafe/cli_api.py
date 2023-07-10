@@ -207,7 +207,6 @@ def missed_and_matched_from_manifest(
         )
 
         if len(matched_package) > 0:
-            breakpoint()
             cfgraph.fetch_package_json(i["name"], matched_package[0], package_arch)
             package_report["matched_packages"].append(
                 {"name": i["name"], "version": i["version"]}

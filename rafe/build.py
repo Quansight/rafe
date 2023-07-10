@@ -26,8 +26,7 @@ def build_package(recipe_dir):
     """
 
     recipe_dir = recipe_dir.resolve()
-    source.provide(recipe_dir)
-    src_dir = source.get_dir()
+    src_dir = source.provide(recipe_dir)
 
     logger.info(
         f"""

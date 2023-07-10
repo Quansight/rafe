@@ -5,3 +5,4 @@ aiofiles==23.1.0
 pyyaml
 requests
 pydantic
+GitPython
