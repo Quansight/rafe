@@ -12,6 +12,7 @@ from rich.progress import Progress
 from rich.prompt import Prompt
 
 from rafe import __version__
+from rafe.griffe_util import check_breaks, verify_removals
 from rafe.cfgraph import CFGraph
 from rafe.build import build_package
 from rafe.config import create_app_dirs
@@ -371,6 +372,65 @@ def callback_plugin_list():
 
     console = Console()
     console.print(table)
+    return
+
+
+check_api_breaks_options = {
+    "package": typer.Option(..., "--package", help="Name of package folder name to check"),
+    "old_tag": typer.Option(..., "--old", help="First package version in comparison"),
+    "new_tag": typer.Option(..., "--new", help="Second package version in comparison"),
+    "path": typer.Option(None, "--path", help="Path to package source. Default behavior expects folder in .rafe/work/{package}"),
+    "break_type": typer.Option(None, "--type", help="Type of api breakage to check. Default behavior dumps all breaks."),
+    "output": typer.Option(None, "--out", help="Path for output json. Default behavior dumps to pwd."),
+}
+
+@app.command(rich_help_panel="API Breaks")
+def check_api_breaks(
+    package: str = check_api_breaks_options["package"],
+    old_tag: str = check_api_breaks_options["old_tag"],
+    new_tag: str = check_api_breaks_options["new_tag"],
+    path: pathlib.Path = check_api_breaks_options["path"],
+    break_type: str = check_api_breaks_options["break_type"],
+    output_path: pathlib.Path = check_api_breaks_options["output"],
+):
+    """
+    Compares two instances of the same package to check for API breaking changes between versions.
+    Default behavior is to expect you have a source copy of the package in .rafe/work/{package} with .git info
+    """
+    if path is None:
+        path = pathlib.Path.home().joinpath(".rafe","work",package)
+    
+    #could consider setting up an auto-acquire here
+    if not path.exists():
+        raise FileNotFound()
+    if output_path is None:
+        output_path = pathlib.Path.cwd()
+
+    temp = check_breaks(package, old_tag, new_tag, path, break_type, output_path, logger)
+    
+    return 
+
+
+verify_breaks_options = {
+    "package": typer.Option(..., "--package", help="Import name of package to check. May be different than package name."),
+    "path": typer.Option(..., "--path", help="Path to breakage json source."),
+}
+
+@app.command(rich_help_panel="API Breaks")
+def verify_breaks(
+    package: str = check_api_breaks_options["package"],
+    path: pathlib.Path = check_api_breaks_options["path"],
+):
+    """
+    Assumes 'new' package version has been installed in some way and added to the pythonpath
+    The easiest route would likely be to unzip a wheel into a working folder and add that folder
+    to $PYTHONPATH. e.g. on linux: export PYTHONPATH=<local path>:$PYTHONPATH
+    """
+    if pathlib.Path(path).exists():
+        verify_removals(package,path,logger)
+    else:
+        logger.error(f"Did not find {path}.")
+
     return
 
 
