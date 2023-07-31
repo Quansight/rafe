@@ -38,6 +38,7 @@ jobs:
     - name: Format with black
       uses: psf/black@stable 
       with:
+        version: "23.3.0"
         options: "--check --verbose"
         src: "./rafe"
         
