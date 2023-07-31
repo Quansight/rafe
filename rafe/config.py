@@ -53,6 +53,27 @@ def create_cfcache_subfolder(rootdir: pathlib.Path) -> None:
     return
 
 
+def create_work_subfolder(rootdir: pathlib.Path) -> None:
+    """
+    Given a root directory, create general work folder
+    """
+    folders = ["work"]
+    for sf in folders:
+        folder = rootdir.joinpath(sf)
+        if not folder.exists():
+            folder.mkdir(parents=True, exist_ok=True)
+            logger.info(
+                "[bold green] CREATE DIRECTORY: [/bold green]" + str(folder),
+                extra={"markup": True},
+            )
+        else:
+            logger.warn(
+                "[bold yellow] DIRECOTRY EXISTS: [/bold yellow]" + str(folder),
+                extra={"markup": True},
+            )
+    return
+
+
 def create_plugin_config(rootdir: pathlib.Path) -> None:
     """
     Given the root directory, create a plugin json.
@@ -88,6 +109,7 @@ def create_app_dirs(rootdir=pathlib.Path.home().joinpath(".rafe/")) -> int:
     create_rafe_rootdir(rootdir)
     create_cfcache_subfolder(rootdir)
     create_plugin_config(rootdir)
+    create_work_subfolder(rootdir)
     return 0
 
 

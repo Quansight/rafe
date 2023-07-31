@@ -40,4 +40,22 @@ Now, you can use rafe however you'd like. Note that you can call it in two ways:
 * `python -m rafe`
 * `rafe`
 
-Both are valid. 
+Both are valid.
+
+### Workflow for Griffe API checks
+
+Assuming you have already run `rafe config --init` you will have the folder `.rafe/work/` - place your git repo folder there, such that numpy would be at `.rafe/work/numpy/`
+
+With this in place you should next run
+
+```bash
+python rafe check-api-breaks --package numpy --old v1.12.1 --new v1.17.5`
+```
+In older griffe versions, if you are given a git branch error, you'll need to clean up the griffe created branches before rerunning. E.g. `git branch -D griffe_v1.12.1` from the appropriate folder
+It has been verified that this is no longer an issue with griffe v0.30.1 (last to support py3.7)
+
+Once you have run the above you should be able to run the verify pass (for objects removed) using the command below:
+```bash
+python rafe verify-breaks --package numpy --path ./numpy_objects_removed.json`
+```
+This will attempt to eval a `hasattr()` for each of the missing items, and where it fails it may attempt to import the missing attribute and try again. The resulting `numpy_actual_misses.json` should be much closer to the truth.
