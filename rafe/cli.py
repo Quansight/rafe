@@ -376,13 +376,26 @@ def callback_plugin_list():
 
 
 check_api_breaks_options = {
-    "package": typer.Option(..., "--package", help="Name of package folder name to check"),
+    "package": typer.Option(
+        ..., "--package", help="Name of package folder name to check"
+    ),
     "old_tag": typer.Option(..., "--old", help="First package version in comparison"),
     "new_tag": typer.Option(..., "--new", help="Second package version in comparison"),
-    "path": typer.Option(None, "--path", help="Path to package source. Default behavior expects folder in .rafe/work/{package}"),
-    "break_type": typer.Option(None, "--type", help="Type of api breakage to check. Default behavior dumps all breaks."),
-    "output": typer.Option(None, "--out", help="Path for output json. Default behavior dumps to pwd."),
+    "path": typer.Option(
+        None,
+        "--path",
+        help="Path to package source. Default behavior expects folder in .rafe/work/{package}",
+    ),
+    "break_type": typer.Option(
+        None,
+        "--type",
+        help="Type of api breakage to check. Default behavior dumps all breaks.",
+    ),
+    "output": typer.Option(
+        None, "--out", help="Path for output json. Default behavior dumps to pwd."
+    ),
 }
+
 
 @app.command(rich_help_panel="API Breaks")
 def check_api_breaks(
@@ -398,23 +411,30 @@ def check_api_breaks(
     Default behavior is to expect you have a source copy of the package in .rafe/work/{package} with .git info
     """
     if path is None:
-        path = pathlib.Path.home().joinpath(".rafe","work",package)
-    
-    #could consider setting up an auto-acquire here
+        path = pathlib.Path.home().joinpath(".rafe", "work", package)
+
+    # could consider setting up an auto-acquire here
     if not path.exists():
         raise FileNotFound()
     if output_path is None:
         output_path = pathlib.Path.cwd()
 
-    temp = check_breaks(package, old_tag, new_tag, path, break_type, output_path, logger)
-    
-    return 
+    temp = check_breaks(
+        package, old_tag, new_tag, path, break_type, output_path, logger
+    )
+
+    return
 
 
 verify_breaks_options = {
-    "package": typer.Option(..., "--package", help="Import name of package to check. May be different than package name."),
+    "package": typer.Option(
+        ...,
+        "--package",
+        help="Import name of package to check. May be different than package name.",
+    ),
     "path": typer.Option(..., "--path", help="Path to breakage json source."),
 }
+
 
 @app.command(rich_help_panel="API Breaks")
 def verify_breaks(
@@ -427,7 +447,7 @@ def verify_breaks(
     to $PYTHONPATH. e.g. on linux: export PYTHONPATH=<local path>:$PYTHONPATH
     """
     if pathlib.Path(path).exists():
-        verify_removals(package,path,logger)
+        verify_removals(package, path, logger)
     else:
         logger.error(f"Did not find {path}.")
 
