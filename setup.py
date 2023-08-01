@@ -20,6 +20,7 @@ setup(
     },
     install_requires=[
         "typer >= 0.7.0",
+        "griffe == 0.30.1",
         "rich",
         "GitPython",
         "aiohttp",
