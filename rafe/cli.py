@@ -343,7 +343,9 @@ def build(
         if result == 0:
             raise typer.Exit()
     else:
-        raise FileNotFound()
+        raise FileNotFoundError(
+            f'Cannot find "{package_path}" ({package_path.absolute()})'
+        )
 
 
 def callback_plugin_add(path):
@@ -415,7 +417,9 @@ def check_api_breaks(
 
     # could consider setting up an auto-acquire here
     if not path.exists():
-        raise FileNotFound()
+        raise FileNotFoundError(
+            f'Missing "{path}" (did you clone the "{package}" repo?)'
+        )
     if output_path is None:
         output_path = pathlib.Path.cwd()
 

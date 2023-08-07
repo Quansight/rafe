@@ -47,7 +47,7 @@ def create_cfcache_subfolder(rootdir: pathlib.Path) -> None:
             )
         else:
             logger.warn(
-                "[bold yellow] DIRECOTRY EXISTS: [/bold yellow]" + str(folder),
+                "[bold yellow] DIRECTORY EXISTS: [/bold yellow]" + str(folder),
                 extra={"markup": True},
             )
     return
@@ -68,7 +68,7 @@ def create_work_subfolder(rootdir: pathlib.Path) -> None:
             )
         else:
             logger.warn(
-                "[bold yellow] DIRECOTRY EXISTS: [/bold yellow]" + str(folder),
+                "[bold yellow] DIRECTORY EXISTS: [/bold yellow]" + str(folder),
                 extra={"markup": True},
             )
     return
