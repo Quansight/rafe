@@ -442,8 +442,8 @@ verify_breaks_options = {
 
 @app.command(rich_help_panel="API Breaks")
 def verify_breaks(
-    package: str = check_api_breaks_options["package"],
-    path: pathlib.Path = check_api_breaks_options["path"],
+    package: str = verify_breaks_options["package"],
+    path: pathlib.Path = verify_breaks_options["path"],
 ):
     """
     Assumes 'new' package version has been installed in some way and added to the pythonpath
